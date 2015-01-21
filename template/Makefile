@@ -11,15 +11,6 @@ GDB = $(TOOLCHAIN_PATH)$(TOOLCHAIN_PREFIX)-gdb
 START_CODE ?= startup_nrf51.s
 SYSTEM_FILE ?= system_nrf51.c
 
-SDK_INCLUDE_PATH += $(SDK_PATH)Include/
-SDK_SOURCE_PATH += $(SDK_PATH)Source/
-CMSIS_INCLUDE_PATH += $(SDK_PATH)Include/gcc
-
-LIBRARY_PATHS += ../
-LIBRARY_PATHS += $(SDK_INCLUDE_PATH)
-LIBRARY_PATHS += $(SDK_INCLUDE_PATH)sdk/
-SOURCE_PATHS += ../ $(SDK_SOURCE_PATH) $(TEMPLATE_PATH) $(wildcard $(SDK_SOURCE_PATH)*/)
-
 ifeq ($(USE_SOFTDEVICE), s110)
     USE_BLE = 1
 endif
@@ -36,6 +27,71 @@ ifeq ($(USE_SOFTDEVICE), s310)
     USE_BLE = 1
     USE_ANT = 1
 endif
+
+
+ifeq ($(SDK_VERSION), 7)
+#this is for version 7
+
+	SDK_INCLUDE_PATH += $(SDK_PATH)components/
+	SDK_SOURCE_PATH += $(SDK_PATH)components/
+	CMSIS_INCLUDE_PATH += $(SDK_PATH)components/toolchain/gcc/
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)libraries/*/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/ble_flash/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/hal/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/pstorage/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/radio_config/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/sdio/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/simple_uart/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/spi_master/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/spi_slave/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/twi_master/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/uart/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_ext/*/)
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)serialization/*/)
+	LIBRARY_PATHS += $(SDK_PATH)components/toolchain/gcc/
+	LIBRARY_PATHS += $(SDK_INCLUDE_PATH)toolchain/
+	SOURCE_PATHS += ../ 
+	SOURCE_PATHS += $(SDK_SOURCE_PATH) 
+	SOURCE_PATHS += $(TEMPLATE_PATH) 
+	SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)*/)
+	SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)libraries/*/)
+	SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)drivers_nrf/*/)
+	SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)drivers_ext/*/)
+	SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)serialization/*/)
+
+ifdef USE_BLE
+    LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)ble/*/)
+    LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)ble/ble_services/*/)
+    SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)ble/*/)
+    SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)ble/ble_services/*/)
+    CFLAGS += -DBLE_STACK_SUPPORT_REQD
+endif
+
+ifdef USE_ANT
+    CFLAGS += -DANT_STACK_SUPPORT_REQD
+endif
+
+ifdef USE_SOFTDEVICE
+    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
+    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
+    SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
+    SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
+else
+	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/nrf_soc_nosd/)
+    USE_SOFTDEVICE = blank
+endif
+
+else
+#this is for version 6(default)
+
+SDK_INCLUDE_PATH += $(SDK_PATH)Include/
+SDK_SOURCE_PATH += $(SDK_PATH)Source/
+CMSIS_INCLUDE_PATH += $(SDK_PATH)Include/gcc
+
+LIBRARY_PATHS += ../
+LIBRARY_PATHS += $(SDK_INCLUDE_PATH)
+LIBRARY_PATHS += $(SDK_INCLUDE_PATH)sdk/
+SOURCE_PATHS += ../ $(SDK_SOURCE_PATH) $(TEMPLATE_PATH) $(wildcard $(SDK_SOURCE_PATH)*/)
 
 ifdef USE_BLE
     LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ble/
@@ -58,13 +114,17 @@ else
     USE_SOFTDEVICE = blank
 endif
 
-LINKER_SCRIPT ?= gcc_nrf51_$(USE_SOFTDEVICE).ld
-OUTPUT_NAME ?= $(addsuffix _$(USE_SOFTDEVICE), $(PROJECT_NAME))
-
 ifdef USE_EXT_SENSORS
 LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ext_sensors/
 SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)ext_sensors/*/)
 endif
+
+endif
+
+print-% : ; @echo $* = $($*)
+
+LINKER_SCRIPT ?= gcc_nrf51_$(USE_SOFTDEVICE).ld
+OUTPUT_NAME ?= $(addsuffix _$(USE_SOFTDEVICE), $(PROJECT_NAME))
 
 LIBRARY_INCLUDES = $(addprefix -I,$(LIBRARY_PATHS))
 CMSIS_INCLUDE = $(addprefix -I,$(CMSIS_INCLUDE_PATH))

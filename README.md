@@ -9,8 +9,8 @@ pull request if you find something that doesn't work.
 This was started (long) before the official SDK got GCC support, but I've kept
 maintaining it, since I don't really like the official Makefiles...
 
-The currently supported SDK version is 6.0.0. Support for some other versions 
-are available as branches.
+The currently supported SDK versions are 6.0.0 and 7.2.0. 
+Support for some other versions are available as branches.
 
 Usage
 -----
@@ -18,7 +18,8 @@ Make a pure-gcc subfolder in your project folder (i.e. alongside the
 arm/gcc/iar folders from the SDK) and copy an example Makefile from the
 examples/ folder into it. Make sure that the SDK_PATH and TEMPLATE_PATH points
 towards your nRF51 SDK installation and the template/ subfolder of your clone
-of this repository respectively.
+of this repository respectively. Also make sure that SDK_VERSION = 7 is
+uncommented if you are using version 7 of the SDK.
 
 Project options
 ---------------

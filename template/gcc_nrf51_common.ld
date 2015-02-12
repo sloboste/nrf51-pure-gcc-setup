@@ -1,5 +1,21 @@
-/* Library configurations */
-GROUP(libgcc.a libc.a libm.a libnosys.a)
+/* Linker script for Nordic Semiconductor nRF5 devices
+ *
+ * Version: Sourcery G++ 4.5-1
+ * Support: https://support.codesourcery.com/GNUToolchain/
+ *
+ * Copyright (c) 2007, 2008, 2009, 2010 CodeSourcery, Inc.
+ *
+ * The authors hereby grant permission to use, copy, modify, distribute,
+ * and license this software and its documentation for any purpose, provided
+ * that existing copyright notices are retained in all copies and that this
+ * notice is included verbatim in any distributions.  No written agreement,
+ * license, or royalty fee is required for any of the authorized uses.
+ * Modifications to this software may be copyrighted by their authors
+ * and need not follow the licensing terms described here, provided that
+ * the new terms are clearly indicated on the first page of each file where
+ * they apply.
+ */
+OUTPUT_FORMAT ("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 
 /* Linker script to place sections and symbol values. Should be used together
  * with other linker script that defines memory regions FLASH and RAM.
@@ -33,7 +49,7 @@ SECTIONS
 {
     .text :
     {
-        KEEP(*(.isr_vector))
+        KEEP(*(.Vectors))
         *(.text*)
 
         KEEP(*(.init))
@@ -55,8 +71,9 @@ SECTIONS
 
         *(.rodata*)
 
-        KEEP(*(.eh_frame*))
+        *(.eh_frame*)
     } > FLASH
+
 
     .ARM.extab :
     {
@@ -80,25 +97,26 @@ SECTIONS
 
         . = ALIGN(4);
         /* preinit data */
-        PROVIDE (__preinit_array_start = .);
+        PROVIDE_HIDDEN (__preinit_array_start = .);
         *(.preinit_array)
-        PROVIDE (__preinit_array_end = .);
+        PROVIDE_HIDDEN (__preinit_array_end = .);
 
         . = ALIGN(4);
         /* init data */
-        PROVIDE (__init_array_start = .);
+        PROVIDE_HIDDEN (__init_array_start = .);
         *(SORT(.init_array.*))
         *(.init_array)
-        PROVIDE (__init_array_end = .);
+        PROVIDE_HIDDEN (__init_array_end = .);
 
 
         . = ALIGN(4);
         /* finit data */
-        PROVIDE (__fini_array_start = .);
+        PROVIDE_HIDDEN (__fini_array_start = .);
         *(SORT(.fini_array.*))
         *(.fini_array)
-        PROVIDE (__fini_array_end = .);
+        PROVIDE_HIDDEN (__fini_array_end = .);
 
+        *(.jcr)
         . = ALIGN(4);
         /* All data end */
         __data_end__ = .;
@@ -107,13 +125,15 @@ SECTIONS
 
     .bss :
     {
+        . = ALIGN(4);
         __bss_start__ = .;
         *(.bss*)
         *(COMMON)
+        . = ALIGN(4);
         __bss_end__ = .;
     } > RAM
 
-    .heap :
+    .heap (COPY):
     {
         __end__ = .;
         end = __end__;
@@ -124,9 +144,9 @@ SECTIONS
     /* .stack_dummy section doesn't contains any symbols. It is only
      * used for linker to calculate size of stack sections, and assign
      * values to stack symbols later */
-    .stack_dummy :
+    .stack_dummy (COPY):
     {
-        *(.stack)
+        *(.stack*)
     } > RAM
 
     /* Set stack top to end of RAM, and stack limit move down by
@@ -138,3 +158,4 @@ SECTIONS
     /* Check if data + heap + stack exceeds RAM limit */
     ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
 }
+

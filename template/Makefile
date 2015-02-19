@@ -105,6 +105,22 @@ ifeq ($(SDK_VERSION), iot)
 		CFLAGS += -flto -fno-builtin
 	endif
 
+	# LDFLAGS += -Xlinker
+	# LDFLAGS += -mabi=aapcs
+	# let linker to dump unused sections
+	LDFLAGS += -Wl,--gc-sections
+	# use newlib in nano version
+	LDFLAGS += --specs=nano.specs -lc -lnosys
+
+	# # ASMFLAGS += --specs=nosys.spec
+	ASMFLAGS += -x assembler-with-cpp
+	ASMFLAGS += -DNRF51
+	ASMFLAGS += -DBOARD_NRF6310
+	ASMFLAGS += -DBLE_STACK_SUPPORT_REQD
+	ASMFLAGS += -DS110
+	ASMFLAGS += -D__HEAP_SIZE=512
+	ASMFLAGS += -DSOFTDEVICE_PRESENT
+
 
 else
 ifeq ($(SDK_VERSION), 7)
@@ -137,67 +153,75 @@ ifeq ($(SDK_VERSION), 7)
 	SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)drivers_ext/*/)
 	SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)serialization/*/)
 
-ifdef USE_BLE
-    LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)ble/*/)
-    LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)ble/ble_services/*/)
-    SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)ble/*/)
-    SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)ble/ble_services/*/)
-    CFLAGS += -DBLE_STACK_SUPPORT_REQD
-endif
+	ifdef USE_BLE
+	    LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)ble/*/)
+	    LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)ble/ble_services/*/)
+	    SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)ble/*/)
+	    SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)ble/ble_services/*/)
+	    CFLAGS += -DBLE_STACK_SUPPORT_REQD
+	    CFLAGS  = -DNRF51
+CFLAGS += -DS110
+	endif
 
-ifdef USE_ANT
-    CFLAGS += -DANT_STACK_SUPPORT_REQD
-endif
+	ifdef USE_ANT
+	    CFLAGS += -DANT_STACK_SUPPORT_REQD
+	endif
 
-ifdef USE_SOFTDEVICE
-    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
-    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
-    SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
-    SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
+	ifdef USE_SOFTDEVICE
+	    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
+	    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
+	    SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
+	    SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
+	else
+		LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/nrf_soc_nosd/)
+	    USE_SOFTDEVICE = blank
+	endif
+
+	ASMFLAGS += -x assembler-with-cpp
+ASMFLAGS += -DNRF51
+ASMFLAGS += -DBLE_STACK_SUPPORT_REQD
+ASMFLAGS += -DS110
+ASMFLAGS += -DSOFTDEVICE_PRESENT
+
+
+
 else
-	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/nrf_soc_nosd/)
-    USE_SOFTDEVICE = blank
-endif
+	#this is for version 6(default)
 
+	SDK_INCLUDE_PATH += $(SDK_PATH)Include/
+	SDK_SOURCE_PATH += $(SDK_PATH)Source/
+	CMSIS_INCLUDE_PATH += $(SDK_PATH)Include/gcc
 
+	LIBRARY_PATHS += ../
+	LIBRARY_PATHS += $(SDK_INCLUDE_PATH)
+	LIBRARY_PATHS += $(SDK_INCLUDE_PATH)sdk/
+	SOURCE_PATHS += ../ $(SDK_SOURCE_PATH) $(TEMPLATE_PATH) $(wildcard $(SDK_SOURCE_PATH)*/)
 
-else
-#this is for version 6(default)
+	ifdef USE_BLE
+	    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ble/
+	    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ble/ble_services/
+	    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ble/device_manager/
+	    SOURCE_PATHS += $(SDK_SOURCE_PATH)ble/ble_services/
+	    SOURCE_PATHS += $(SDK_SOURCE_PATH)ble/device_manager/
+	    CFLAGS += -DBLE_STACK_SUPPORT_REQD
+	endif
 
-SDK_INCLUDE_PATH += $(SDK_PATH)Include/
-SDK_SOURCE_PATH += $(SDK_PATH)Source/
-CMSIS_INCLUDE_PATH += $(SDK_PATH)Include/gcc
+	ifdef USE_ANT
+	    CFLAGS += -DANT_STACK_SUPPORT_REQD
+	endif
 
-LIBRARY_PATHS += ../
-LIBRARY_PATHS += $(SDK_INCLUDE_PATH)
-LIBRARY_PATHS += $(SDK_INCLUDE_PATH)sdk/
-SOURCE_PATHS += ../ $(SDK_SOURCE_PATH) $(TEMPLATE_PATH) $(wildcard $(SDK_SOURCE_PATH)*/)
+	ifdef USE_SOFTDEVICE
+	    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)$(USE_SOFTDEVICE)
+	    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)app_common/
+	    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)sd_common/
+	else
+	    USE_SOFTDEVICE = blank
+	endif
 
-ifdef USE_BLE
-    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ble/
-    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ble/ble_services/
-    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ble/device_manager/
-    SOURCE_PATHS += $(SDK_SOURCE_PATH)ble/ble_services/
-    SOURCE_PATHS += $(SDK_SOURCE_PATH)ble/device_manager/
-    CFLAGS += -DBLE_STACK_SUPPORT_REQD
-endif
-
-ifdef USE_ANT
-    CFLAGS += -DANT_STACK_SUPPORT_REQD
-endif
-
-ifdef USE_SOFTDEVICE
-    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)$(USE_SOFTDEVICE)
-    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)app_common/
-    LIBRARY_PATHS += $(SDK_INCLUDE_PATH)sd_common/
-else
-    USE_SOFTDEVICE = blank
-endif
-
-ifdef USE_EXT_SENSORS
-LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ext_sensors/
-SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)ext_sensors/*/)
-endif
+	ifdef USE_EXT_SENSORS
+	LIBRARY_PATHS += $(SDK_INCLUDE_PATH)ext_sensors/
+	SOURCE_PATHS += $(wildcard $(SDK_SOURCE_PATH)ext_sensors/*/)
+	endif
 
 endif
 endif
@@ -218,21 +242,7 @@ CPUFLAGS = -mthumb -mabi=aapcs -mcpu=cortex-m0 -march=armv6-m
 CFLAGS += -std=gnu99 -c $(CPUFLAGS) -Wall -D$(DEVICE) -D$(BOARD) $(CMSIS_INCLUDE) $(LIBRARY_INCLUDES) -MD
 LDFLAGS += $(CPUFLAGS) -L $(TEMPLATE_PATH) -T $(LINKER_SCRIPT) -Wl,-Map=$(OUTPUT_PATH)$(OUTPUT_NAME).Map
 
-# LDFLAGS += -Xlinker
-# LDFLAGS += -mabi=aapcs
-# let linker to dump unused sections
-LDFLAGS += -Wl,--gc-sections
-# use newlib in nano version
-LDFLAGS += --specs=nano.specs -lc -lnosys
 
-# # ASMFLAGS += --specs=nosys.spec
-ASMFLAGS += -x assembler-with-cpp
-ASMFLAGS += -DNRF51
-ASMFLAGS += -DBOARD_NRF6310
-ASMFLAGS += -DBLE_STACK_SUPPORT_REQD
-ASMFLAGS += -DS110
-ASMFLAGS += -D__HEAP_SIZE=512
-ASMFLAGS += -DSOFTDEVICE_PRESENT
 
 
 HEX = $(OUTPUT_PATH)$(OUTPUT_NAME).hex

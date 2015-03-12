@@ -73,6 +73,6 @@ startdebug: debug-gdbinit
 	$(TERMINAL) "$(GDB) $(ELF)"
 
 debug-gdbinit:
-	printf "target remote localhost:$(GDB_PORT_NUMBER)\nbreak main\n" > .gdbinit
+	printf "target remote localhost:$(GDB_PORT_NUMBER)\nload\nmon reset\nbreak main\n" > .gdbinit
 
 .PHONY: flash flash-softdevice erase-all startdebug

@@ -151,6 +151,10 @@ JLINK_OPTIONS = -device nrf51822 -if swd -speed 1000
 
 all: $(OBJS) $(OBJS_AS) $(HEX)
 
+debug: CFLAGS += -g
+debug: $(OBJS) $(OBJS_AS) $(HEX)
+ 
+
 rebuild: clean all
 
 ifeq ($(OS),Windows_NT)

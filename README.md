@@ -64,6 +64,9 @@ Provides equal functionality to that of nrfjprog / nRFgo Studio on Windows.
 Can be used to flash a softdevice to a chip. The path to the softdevice hex
 needs to be without spaces, due to Make limitations.
 
+### debug:
+Makes with debug symbols. Use before startdebug.
+
 ### startdebug:
 Starts a J-Link GDB Server in a separate terminal window, and then GDB
 also in a separate window. If you change the code, you can then make directly

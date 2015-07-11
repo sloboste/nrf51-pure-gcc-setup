@@ -193,7 +193,7 @@ endif
 
 print-% : ; @echo $* = $($*)
 
-LINKER_SCRIPT ?= gcc_nrf51_$(USE_SOFTDEVICE).ld
+LINKER_SCRIPT ?= gcc_nrf51_$(USE_SOFTDEVICE)$(SOFTDEVICE_VERSION).ld
 OUTPUT_NAME ?= $(addsuffix _$(USE_SOFTDEVICE), $(PROJECT_NAME))
 
 LIBRARY_INCLUDES = $(addprefix -I,$(LIBRARY_PATHS))

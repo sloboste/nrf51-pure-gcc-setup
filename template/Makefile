@@ -88,7 +88,7 @@ ifdef USE_SOFTDEVICE
     SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
     SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
     #Mark that we need the linker file for soft device 8.x.x
-    USE_SOFTDEVICE += _8
+    SOFTDEVICE_VERSION = _8
 else
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/nrf_soc_nosd/)
     USE_SOFTDEVICE = blank

@@ -1,5 +1,5 @@
 # Set toolchain path if arm-none-eabi- binaries are not in user path
-# TOOLCHAIN_PATH ?= 
+# TOOLCHAIN_PATH ?=
 TERMINAL ?= gnome-terminal -e
 
 FLASH_START_ADDRESS = $(shell $(OBJDUMP) -h $(ELF) -j .text | grep .text | awk '{print $$4}')
@@ -66,6 +66,9 @@ erase-all: erase-all.jlink
 erase-all.jlink:
 	# Write to NVMC to enable erase, do erase all, wait for completion. reset
 	printf "w4 4001e504 2\nw4 4001e50c 1\nsleep 100\nr\nexit\n" > erase-all.jlink
+
+from-scratch: all flash.jlink flash-softdevice
+	$(JLINK) flash.jlink
 
 startdebug: debug-gdbinit
 	$(TERMINAL) "$(JLINKGDBSERVER) -port $(GDB_PORT_NUMBER)"

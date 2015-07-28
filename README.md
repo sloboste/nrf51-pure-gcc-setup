@@ -9,8 +9,7 @@ pull request if you find something that doesn't work.
 This was started (long) before the official SDK got GCC support, but I've kept
 maintaining it, since I don't really like the official Makefiles...
 
-The currently supported SDK versions are 6.0.0 and 7.2.0. 
-Support for some other versions are available as branches.
+The currently supported SDK versions are 6.0.0, 7.2.0, and 9.0.0.
 
 Usage
 -----

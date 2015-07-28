@@ -32,7 +32,7 @@ flash-softdevice: erase-all flash-softdevice.jlink
 ifndef SOFTDEVICE
 	$(error "You need to set the SOFTDEVICE command-line parameter to a path (without spaces) to the softdevice hex-file")
 endif
-
+	$(MAKE_BUILD_FOLDER)
 	$(OBJCOPY) -Iihex -Obinary $(SOFTDEVICE) $(SOFTDEVICE_OUTPUT:.hex=.bin)
 	$(JLINK) flash-softdevice.jlink
 

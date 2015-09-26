@@ -24,9 +24,21 @@ clean:
 
 flash: all flash.jlink
 	$(JLINK) flash.jlink
+	rm flash.jlink
 
+ifndef ID
 flash.jlink:
 	printf "r\nloadbin $(BIN) $(FLASH_START_ADDRESS)\nr\ng\nexit\n" > flash.jlink
+else
+# Write the ID to flash as well
+ID_BYTES = $(subst :, ,$(ID))
+ID_FIRST = $(word 1,$(ID_BYTES))$(word 2,$(ID_BYTES))
+ID_SECON = $(word 3,$(ID_BYTES))$(word 4,$(ID_BYTES))$(word 5,$(ID_BYTES))$(word 6,$(ID_BYTES))
+flash.jlink:
+	printf "r\n" > flash.jlink
+	printf "w4 0x0003fff8, 0x$(ID_SECON) 0x$(ID_FIRST)\n" >> flash.jlink
+	printf "loadbin $(BIN) $(FLASH_START_ADDRESS)\nr\ng\nexit\n" >> flash.jlink
+endif
 
 flash-softdevice: erase-all flash-softdevice.jlink
 ifndef SOFTDEVICE

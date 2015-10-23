@@ -88,7 +88,7 @@ ifdef USE_SOFTDEVICE
     SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
     SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
     #Mark that we need the linker file for soft device 8.x.x
-    SOFTDEVICE_VERSION = _8
+    SOFTDEVICE_VERSION ?= 8.0.0
 else
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/nrf_soc_nosd/)
     USE_SOFTDEVICE = blank
@@ -145,6 +145,7 @@ ifdef USE_SOFTDEVICE
     LIBRARY_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
     SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
     SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
+    SOFTDEVICE_VERSION ?= 7.3.0
 else
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/nrf_soc_nosd/)
     USE_SOFTDEVICE = blank
@@ -193,7 +194,7 @@ endif
 
 print-% : ; @echo $* = $($*)
 
-LINKER_SCRIPT ?= gcc_nrf51_$(USE_SOFTDEVICE)$(SOFTDEVICE_VERSION).ld
+LINKER_SCRIPT ?= gcc_nrf51_$(USE_SOFTDEVICE)_$(SOFTDEVICE_VERSION).ld
 OUTPUT_NAME ?= $(addsuffix _$(USE_SOFTDEVICE), $(PROJECT_NAME))
 
 LIBRARY_INCLUDES = $(addprefix -I,$(LIBRARY_PATHS))

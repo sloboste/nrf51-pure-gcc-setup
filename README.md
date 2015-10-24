@@ -1,66 +1,65 @@
 nrf51-pure-gcc-setup
 ====================
 
-A simple and cross-platform GCC setup for nRF51 development. I've developed
-it on Linux, but should also work fine on OS X and on Windows. Beware that
-neither of those are regularly used by me, though. Feel free to submit a
-pull request if you find something that doesn't work.
+A simple and cross-platform GCC setup for nRF51 development. Forked from
+original repo
+(hlnd/nrf51-pure-gcc-setup)[https://github.com/hlnd/nrf51-pure-gcc-setup].
+We develop on Linux. Original files still exist for Windows, but have not been
+tested in some time. Feel free to submit a pull request if you find something
+that doesn't work.
 
-This was started (long) before the official SDK got GCC support, but I've kept
-maintaining it, since I don't really like the official Makefiles...
+The currently supported SDK versions are: 7, 9
 
-The currently supported SDK versions are 6.0.0, 7.2.0, and 9.0.0.
+The currently supported Softdevice versions are: s110_7.3.0, s110_8.0.0, s120_2.1.0, and s130_1.0.0
+
 
 Usage
 -----
-Make a pure-gcc subfolder in your project folder (i.e. alongside the
-arm/gcc/iar folders from the SDK) and copy an example Makefile from the
-examples/ folder into it. Make sure that the SDK_PATH and TEMPLATE_PATH points
-towards your nRF51 SDK installation and the template/ subfolder of your clone
-of this repository respectively. Also make sure that SDK_VERSION = 7 is
-uncommented if you are using version 7 of the SDK.
+We use this repo as a submodule of
+(nrf5x-base)[https://github.com/lab11/nrf5x-base], a collection of libraries,
+SDKs, and Softdevices for the nRF5X family of chips. An example of this project
+in use can be found
+(here)[https://github.com/helena-project/squall/tree/master/software/apps/beacon].
 
-Project options
----------------
-All source files, if they are in the application folder (../ from the
-Makefile) or somewhere in the SDK should be possible to include directly,
-without a path. If you want to add some other path to the search paths, add it
-to LIBRARY_PATHS (header files) or SOURCE_PATHS.
+Alternatively, this repo can be submoduled within your own project to use it or
+cloned elsewhere on your system. Your project Makefile will need to define:
+ * TEMPLATE_PATH pointing to the template/ folder of
+ * SDK_PATH pointing to the nRF51 SDK installation
+ * SDK_VERSION set to the major version number of the SDK you are using (i.e. 9)
+ * SOFTDEVICE pointing to the correct softdevice.hex file
+ * USE_SOFTDEVICE set to the softdevice type you are using (i.e. s110)
 
-Make sure that the USE_SOFTDEVICE variable is set to whichever softdevice is
-currently programmed on your board, lowercase. The value is directly used in
-paths, so if it's uppercase, you'll most likely end up with files not being
-found, at least on OS X/Linux. Currently S110, S120, S210 and S310 should be
-supported, although only S110 have been well-tested.
-
-If you use the boards.h file, make sure that the BOARD define is set
-to the board you're currently using.
-
-If you have multiple J-Links connected to your system, you should
-set the SEGGER_SERIAL variable to the serial number of your J-Link, so that
-the programming Just Works (tm). It seems Segger on Linux isn't capable of
-giving you a selection of J-Links, as on Windows.
+You can override most of the defines from the other Makefiles by setting them
+in your project file, since most of them use ?=.
 
 If you want to use the GDB functionality with multiple J-Links, you should
 make sure that all projects have a unique GDB port number defined in their
 project Makefile.
 
-You can override most of the defines from the other Makefiles by setting them
-in your project file, since most of them use ?=.
 
 Targets
 -------
 Most of the targets provided should be self explanatory, but some may use some
 extra explanation:
 
+### flash:
+Build project and flash onto a chip. Also checks that the correct softdevice is
+already on the chip, and automatically runs flash-softdevice if not. 
+
+### flash ID=XX:XX:XX:XX:XX:XX
+Sets the Bluetooth ID for the chip to whatever replaces XX:XX:XX:XX:XX:XX (must
+be valid hex digits). Bluetooth ID is written to the top of flash and persists
+across future flashes (but not erase-alls).
+
 ### erase-all:
 Does an erase all of a chip.
 
-### recover:
-Provides equal functionality to that of nrfjprog / nRFgo Studio on Windows.
+### flash-softdevice
+Used to flash a softdevice to a chip. (Note, this is done automatically by
+make flash). Flashes softdevice as specified in the project Makefile.
 
 ### flash-softdevice SOFTDEVICE=$(PATH_TO_SOFTDEVICE_WITHOUT_SPACES)
-Can be used to flash a softdevice to a chip. The path to the softdevice hex
+Flashes a specific version of the softdevice. The path to the softdevice hex
 needs to be without spaces, due to Make limitations.
 
 ### debug:
@@ -70,5 +69,14 @@ Makes with debug symbols. Use before startdebug.
 Starts a J-Link GDB Server in a separate terminal window, and then GDB
 also in a separate window. If you change the code, you can then make directly
 from gdb, and do load to run the new code.
+
+### recover:
+Provides equal functionality to that of nrfjprog / nRFgo Studio on Windows.
+
+
+If you have multiple J-Links connected to your system, you should
+set the SEGGER_SERIAL variable to the serial number of your J-Link, so that
+the programming Just Works (tm). It seems Segger on Linux isn't capable of
+giving you a selection of J-Links, as on Windows.
 
 

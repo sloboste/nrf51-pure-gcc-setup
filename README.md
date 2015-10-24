@@ -3,7 +3,7 @@ nrf51-pure-gcc-setup
 
 A simple and cross-platform GCC setup for nRF51 development. Forked from
 original repo
-(hlnd/nrf51-pure-gcc-setup)[https://github.com/hlnd/nrf51-pure-gcc-setup].
+[hlnd/nrf51-pure-gcc-setup](https://github.com/hlnd/nrf51-pure-gcc-setup).
 We develop on Linux. Original files still exist for Windows, but have not been
 tested in some time. Feel free to submit a pull request if you find something
 that doesn't work.
@@ -12,14 +12,20 @@ The currently supported SDK versions are: 7, 9
 
 The currently supported Softdevice versions are: s110_7.3.0, s110_8.0.0, s120_2.1.0, and s130_1.0.0
 
+Things to Install
+-----------------
+1. gcc-arm-none-eabi
+2. gdb-arm-none-eabi
+3. The jlink tools for linux
+4. The jlink debuger for linux
 
 Usage
 -----
 We use this repo as a submodule of
-(nrf5x-base)[https://github.com/lab11/nrf5x-base], a collection of libraries,
+[nrf5x-base](https://github.com/lab11/nrf5x-base), a collection of libraries,
 SDKs, and Softdevices for the nRF5X family of chips. An example of this project
 in use can be found
-(here)[https://github.com/helena-project/squall/tree/master/software/apps/beacon].
+[here](https://github.com/helena-project/squall/tree/master/software/apps/beacon).
 
 Alternatively, this repo can be submoduled within your own project to use it or
 cloned elsewhere on your system. Your project Makefile will need to define:
@@ -42,35 +48,38 @@ Targets
 Most of the targets provided should be self explanatory, but some may use some
 extra explanation:
 
-### flash:
+###### flash:
 Build project and flash onto a chip. Also checks that the correct softdevice is
 already on the chip, and automatically runs flash-softdevice if not. 
 
-### flash ID=XX:XX:XX:XX:XX:XX
+###### flash ID=XX:XX:XX:XX:XX:XX
 Sets the Bluetooth ID for the chip to whatever replaces XX:XX:XX:XX:XX:XX (must
 be valid hex digits). Bluetooth ID is written to the top of flash and persists
 across future flashes (but not erase-alls).
 
-### erase-all:
+###### erase-all:
 Does an erase all of a chip.
 
-### flash-softdevice
+###### flash-softdevice
 Used to flash a softdevice to a chip. (Note, this is done automatically by
 make flash). Flashes softdevice as specified in the project Makefile.
 
-### flash-softdevice SOFTDEVICE=$(PATH_TO_SOFTDEVICE_WITHOUT_SPACES)
+###### flash-softdevice SOFTDEVICE=$(PATH_TO_SOFTDEVICE_WITHOUT_SPACES)
 Flashes a specific version of the softdevice. The path to the softdevice hex
 needs to be without spaces, due to Make limitations.
 
-### debug:
+###### debug:
 Makes with debug symbols. Use before startdebug.
 
-### startdebug:
+###### startdebug:
 Starts a J-Link GDB Server in a separate terminal window, and then GDB
 also in a separate window. If you change the code, you can then make directly
 from gdb, and do load to run the new code.
 
-### recover:
+To use this feature you must enable the working path as safe! you can also 
+enable all paths by adding 'set auto-load safe-path /' to ~/.gdbinit.
+
+###### recover:
 Provides equal functionality to that of nrfjprog / nRFgo Studio on Windows.
 
 

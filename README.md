@@ -55,7 +55,8 @@ already on the chip, and automatically runs flash-softdevice if not.
 ###### flash ID=XX:XX:XX:XX:XX:XX
 Sets the Bluetooth ID for the chip to whatever replaces XX:XX:XX:XX:XX:XX (must
 be valid hex digits). Bluetooth ID is written to the top of flash and persists
-across future flashes (but not erase-alls).
+across future flashes (but not erase-alls). Application code needs to read the
+value from flash and actually set it as the Bluetooth ID.
 
 ###### erase-all:
 Does an erase all of a chip.

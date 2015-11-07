@@ -22,14 +22,13 @@ clean:
 	rm -f JLink.log
 	rm -f .gdbinit
 
-flash: all flash.jlink test-softdevice test-flash_size
-	$(JLINK) $(OUTPUT_PATH)flash.jlink
+flashRTT: flash
+	$(JLINK)&
+	JLinkRTTClient
 
-ifndef ID
-test-flash_size:
-	@echo "Not loading device ID"
-else
-endif
+flash: all flash.jlink test-softdevice
+	$(JLINK) $(OUTPUT_PATH)flash.jlink
+	rm $(OUTPUT_PATH)flash.jlink
 
 ifndef ID
 flash.jlink:
@@ -43,25 +42,6 @@ flash.jlink:
 	printf "r\n" > $(OUTPUT_PATH)flash.jlink
 	printf "w4 0x0003fff8, 0x$(ID_SECON) 0x$(ID_FIRST)\n" >> $(OUTPUT_PATH)flash.jlink
 	printf "loadbin $(BIN) $(FLASH_START_ADDRESS)\nr\ng\nexit\n" >> $(OUTPUT_PATH)flash.jlink
-
-# get flash size from the connected chip
-# 128 pages for 128 KB, 256 pages for 256 KB
-DEVICE_PAGE_NUM_ADDR  = 0x10000014
-FLASH_SIZE_BIN = $(OUTPUT_PATH)flash_size.bin
-test-flash_size.jlink:
-	printf "r\nsavebin $(FLASH_SIZE_BIN) $(DEVICE_PAGE_NUM_ADDR) 4\nexit\n" > $(OUTPUT_PATH)test-flash_size.jlink
-
-test-flash_size: flash.jlink test-flash_size.jlink
-	$(MAKE_BUILD_FOLDER)
-	@touch $(FLASH_SIZE_BIN)
-	@$(JLINK) $(OUTPUT_PATH)test-flash_size.jlink
-	@od -d -Anone $(OUTPUT_PATH)flash_size.bin | awk '{print $1;}' | grep -q 256 || $(MAKE) small_flash_id
-
-small_flash_id: flash.jlink
-	@rm $(OUTPUT_PATH)flash.jlink
-	@printf "r\n" > $(OUTPUT_PATH)flash.jlink
-	@printf "w4 0x0001fff8, 0x$(ID_SECON) 0x$(ID_FIRST)\n" >> $(OUTPUT_PATH)flash.jlink
-	@printf "loadbin $(BIN) $(FLASH_START_ADDRESS)\nr\ng\nexit\n" >> $(OUTPUT_PATH)flash.jlink
 endif
 
 test-softdevice: test-softdevice.jlink
@@ -75,7 +55,7 @@ endif
 	@dd skip=$(shell printf "%d" $(SOFTDEVICE_TEST_ADDR)) count=$(shell printf "%d" $(SOFTDEVICE_TEST_LEN)) if=$(SOFTDEVICE_OUTPUT:.hex=.bin) of=$(SOFTDEVICE_TEST_BIN) bs=1
 	@diff -q $(SOFTDEVICE_TEST_FLASH) $(SOFTDEVICE_TEST_BIN) || $(MAKE) flash-softdevice
 
-# address and length determined experimentally. Works for s110_7, s110_8, s120_2, and s130_1
+# address and length determined experimentally for s110_7 and s110_8
 SOFTDEVICE_TEST_ADDR = 0x1000
 SOFTDEVICE_TEST_LEN = 0x10
 SOFTDEVICE_TEST_BIN = $(OUTPUT_PATH)softdevice_test.bin

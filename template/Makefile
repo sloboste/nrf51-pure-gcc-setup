@@ -19,10 +19,6 @@ ifeq ($(USE_SOFTDEVICE), s120)
     USE_BLE = 1
 endif
 
-ifeq ($(USE_SOFTDEVICE), s130)
-    USE_BLE = 1
-endif
-
 ifeq ($(USE_SOFTDEVICE), s210)
     USE_ANT = 1
 endif
@@ -31,6 +27,8 @@ ifeq ($(USE_SOFTDEVICE), s310)
     USE_BLE = 1
     USE_ANT = 1
 endif
+
+
 
 
 ifeq ($(SDK_VERSION), 9)
@@ -61,7 +59,7 @@ ifeq ($(SDK_VERSION), 9)
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_ext/*/)
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)device/)
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)serialization/*/)
-	LIBRARY_PATHS += $(SDK_INCLUDE_PATH)toolchain/gcc/
+	LIBRARY_PATHS += $(SDK_PATH)components/toolchain/gcc/
 	LIBRARY_PATHS += $(SDK_INCLUDE_PATH)toolchain/
 	SOURCE_PATHS += ../
 	SOURCE_PATHS += $(SDK_SOURCE_PATH)
@@ -90,7 +88,7 @@ ifdef USE_SOFTDEVICE
     SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
     SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
     #Mark that we need the linker file for soft device 8.x.x
-    SOFTDEVICE_VERSION ?= 8.0.0
+    SOFTDEVICE_VERSION = _8
 else
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/nrf_soc_nosd/)
     USE_SOFTDEVICE = blank
@@ -118,9 +116,8 @@ ifeq ($(SDK_VERSION), 7)
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/twi_master/)
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/uart/)
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_ext/*/)
-	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)device/)
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)serialization/*/)
-	LIBRARY_PATHS += $(SDK_INCLUDE_PATH)toolchain/gcc/
+	LIBRARY_PATHS += $(SDK_PATH)components/toolchain/gcc/
 	LIBRARY_PATHS += $(SDK_INCLUDE_PATH)toolchain/
 	SOURCE_PATHS += ../
 	SOURCE_PATHS += $(SDK_SOURCE_PATH)
@@ -148,7 +145,6 @@ ifdef USE_SOFTDEVICE
     LIBRARY_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
     SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/common/softdevice_handler/
     SOURCE_PATHS += $(SDK_INCLUDE_PATH)softdevice/$(USE_SOFTDEVICE)/headers/
-    SOFTDEVICE_VERSION ?= 7.3.0
 else
 	LIBRARY_PATHS += $(wildcard $(SDK_INCLUDE_PATH)drivers_nrf/nrf_soc_nosd/)
     USE_SOFTDEVICE = blank
@@ -197,7 +193,7 @@ endif
 
 print-% : ; @echo $* = $($*)
 
-LINKER_SCRIPT ?= gcc_nrf51_$(USE_SOFTDEVICE)_$(SOFTDEVICE_VERSION).ld
+LINKER_SCRIPT ?= gcc_nrf51_$(USE_SOFTDEVICE)$(SOFTDEVICE_VERSION).ld
 OUTPUT_NAME ?= $(addsuffix _$(USE_SOFTDEVICE), $(PROJECT_NAME))
 
 LIBRARY_INCLUDES = $(addprefix -I,$(LIBRARY_PATHS))

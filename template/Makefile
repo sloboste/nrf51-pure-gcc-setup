@@ -205,7 +205,8 @@ OUTPUT_PATH = _build/
 
 CPUFLAGS = -mthumb -mcpu=cortex-m0 -march=armv6-m
 CFLAGS += -std=gnu99 -c $(CPUFLAGS) -Wall -D$(DEVICE) -D$(BOARD) $(CMSIS_INCLUDE) $(LIBRARY_INCLUDES) -MD
-LDFLAGS += $(CPUFLAGS) -L $(TEMPLATE_PATH) -T $(LINKER_SCRIPT) -Wl,-Map=$(OUTPUT_PATH)$(OUTPUT_NAME).Map
+# nano.specs --> https://devzone.nordicsemi.com/question/4740/how-to-get-rid-of-impure_data/#reply-4749
+LDFLAGS += --specs=nano.specs $(CPUFLAGS) -L $(TEMPLATE_PATH) -T $(LINKER_SCRIPT) -Wl,-Map=$(OUTPUT_PATH)$(OUTPUT_NAME).Map
 
 HEX = $(OUTPUT_PATH)$(OUTPUT_NAME).hex
 ELF = $(OUTPUT_PATH)$(OUTPUT_NAME).elf
